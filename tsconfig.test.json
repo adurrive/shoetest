@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noImplicitReturns": false,
+    "rootDir": "./",
+    "noEmit": true,
+    "types": ["jest", "node"]
+  },
+  "include": ["test/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
