@@ -20,11 +20,16 @@ Powerful fuzzy string matching that's insensitive to diacritics, special charact
 npm install shoetest
 ```
 
-## 🚀 Quick Start
+## 📖 Usage Examples
 
-### CommonJS (Node.js)
+### Getting Started
+
 ```javascript
+// CommonJS
 const shoetest = require('shoetest');
+
+// ES Modules
+import shoetest from 'shoetest';
 
 // Basic fuzzy matching
 shoetest.test('cafe', 'café');        // → true
@@ -32,21 +37,8 @@ shoetest.test('hello', 'HELLO');      // → true
 shoetest.test('naif', 'naïf');        // → true
 ```
 
-### ES Modules (TypeScript/Modern JavaScript)
-```typescript
-import shoetest from 'shoetest';
-
-// Advanced matching with arrays
-shoetest.test('hello world', ['hi', 'hello world', 'test']);  // → true
-shoetest.match('test', 'testing contest protest');           // → ['test', 'test', 'test']
-```
-
-## 📖 Usage Examples
-
-### Basic String Matching
+### String Matching
 ```javascript
-const shoetest = require('shoetest');
-
 const text1 = 'heļlṏ, wɵrḻɖ!';
 const text2 = 'Algæ Britannicæ';
 const text3 = 'The Crème de la Crème de la Crème!';
@@ -85,21 +77,23 @@ shoetest.complexify('This is Mars!');
 
 ### Advanced Configuration
 ```javascript
-const options = {
+// Precise matching with word boundaries
+const preciseOptions = {
   charCase: true,     // Case-sensitive matching
-  strict: false,      // Allow similar characters (e → é)
+  strict: false,      // Allow similar characters (s → $)
   diacritics: true,   // Match accents exactly
   symbols: false,     // Ignore punctuation differences
   begin: '\\b',       // Word boundary at start
   end: '\\b'          // Word boundary at end
 };
 
-shoetest.test('creme de la creme', text3, options);  // → false
-shoetest.test('Creme de la Creme', text3, options);  // → true
+shoetest.test('creme de la creme', text3, preciseOptions);  // → false (case mismatch)
+shoetest.test('Creme de la Creme', text3, preciseOptions);  // → true
 
-// Word boundary examples
-shoetest.test('Alg', text2);              // → true (partial match)
-shoetest.test('Alg', text2, options);     // → false (requires word boundary)
+// Boundaries vs begin/end comparison
+shoetest.test('Alg', text2);                                        // → true (partial match)
+shoetest.test('Alg', text2, { begin: '\\b', end: '\\b' });         // → false (requires word boundary)
+shoetest.test('hello world', 'helloworld', { boundaries: false }); // → true (ignores whitespace)
 ```
 
 ## 🔧 API Reference
@@ -165,7 +159,7 @@ Creates a fuzzy matching regular expression.
 ### `strict` (boolean)
 **Default:** `true`
 
-Use strict character matching. When `false`, allows similar characters like `s` with `$` or `e` with `€`.
+Use strict character matching. When `false`, allows similar-looking characters like `s` with `$` or `e` with `€`.
 
 ### `diacritics` (boolean)
 **Default:** `false`
@@ -190,7 +184,9 @@ Match whitespace exactly. When `true`, spaces must be identical.
 ### `boundaries` (boolean)
 **Default:** `true`
 
-Use word boundaries. When `false`, allows partial word matches.
+Controls whitespace handling in patterns. When `true` (default), whitespace in the pattern must match whitespace in the target text. When `false`, whitespace in the pattern is ignored, allowing matches across word boundaries.
+
+**Important:** This option does NOT use regex word boundaries (`\b`). For true word boundaries, use the `begin` and `end` options with `\\b`.
 
 ### `begin` (string)
 **Default:** `''`
@@ -214,10 +210,12 @@ npm run test:coverage # Generate coverage report
 
 ```bash
 npm run build         # Build the library
-npm run build:watch   # Build in watch mode
+npm run dev           # Build in watch mode
+npm run clean         # Clean dist and coverage directories
 npm run lint          # Run ESLint
-npm run format        # Format code with Prettier
+npm run lint:fix      # Run ESLint and fix issues
 npm run typecheck     # Run TypeScript type checking
+npm run validate      # Run typecheck, lint, and tests
 ```
 
 ## 📄 License

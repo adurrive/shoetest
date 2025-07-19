@@ -448,6 +448,82 @@ describe('shoetest', () => {
     });
   });
 
+  describe('boundaries: true (default)', () => {
+    it('should NOT use word boundaries \\b - only affects whitespace handling', () => {
+      // This shows that boundaries: true does NOT enforce word boundaries
+      expect(shoetest.test('test', 'testing')).toBe(true); // matches partial words
+      expect(shoetest.test('cat', 'category')).toBe(true); // matches at start
+      expect(shoetest.test('ing', 'testing')).toBe(true); // matches at end
+    });
+
+    it('should handle whitespace strictly when boundaries: true', () => {
+      // boundaries: true means whitespace in pattern must match whitespace in text
+      expect(shoetest.test('hello world', 'hello world')).toBe(true);
+      expect(shoetest.test('hello world', 'hello    world')).toBe(true); // multiple spaces match
+      expect(shoetest.test('hello world', 'helloworld')).toBe(false); // no space doesn't match
+    });
+  });
+
+  describe('boundaries: false', () => {
+    it('should ignore whitespace boundaries completely', () => {
+      // boundaries: false allows matching across word boundaries without requiring whitespace
+      expect(shoetest.test('hello world', 'helloworld', { boundaries: false })).toBe(
+        true,
+      );
+      expect(shoetest.test('hello world', 'hello-world', { boundaries: false })).toBe(
+        true,
+      );
+      expect(shoetest.test('hello world', 'hello_world', { boundaries: false })).toBe(
+        true,
+      );
+    });
+
+    it('should enable partial word matching across boundaries', () => {
+      expect(
+        shoetest.test('thecreme', 'The Crème de la Crème', { boundaries: false }),
+      ).toBe(true);
+      // Note: 'helwor' doesn't match 'hello world' because boundaries: false
+      // removes whitespace from the pattern, making it try to match 'helwor' as a continuous string
+      expect(shoetest.test('helloworld', 'hello world', { boundaries: false })).toBe(
+        true,
+      );
+    });
+  });
+
+  describe('boundaries vs begin/end parameters', () => {
+    it('should use begin/end for actual word boundaries', () => {
+      // To get true word boundaries, use begin/end with \\b
+      expect(shoetest.test('test', 'testing', { begin: '\\b', end: '\\b' })).toBe(
+        false,
+      );
+      expect(shoetest.test('test', 'a test case', { begin: '\\b', end: '\\b' })).toBe(
+        true,
+      );
+      expect(shoetest.test('cat', 'category', { begin: '\\b', end: '\\b' })).toBe(
+        false,
+      );
+      expect(shoetest.test('cat', 'a cat is', { begin: '\\b', end: '\\b' })).toBe(true);
+    });
+
+    it('should combine boundaries: false with begin/end for flexible matching', () => {
+      // boundaries: false + begin: '\\b' = word start only
+      expect(
+        shoetest.test('test', 'testing', { boundaries: false, begin: '\\b' }),
+      ).toBe(true);
+      expect(
+        shoetest.test('test', 'contest', { boundaries: false, begin: '\\b' }),
+      ).toBe(false);
+
+      // boundaries: false + end: '\\b' = word end only
+      expect(shoetest.test('test', 'contest', { boundaries: false, end: '\\b' })).toBe(
+        true,
+      );
+      expect(shoetest.test('test', 'testing', { boundaries: false, end: '\\b' })).toBe(
+        false,
+      );
+    });
+  });
+
   describe('advanced configuration options', () => {
     it('should handle boundaries: false with symbols: true', () => {
       const text = 'hello world test';

@@ -1,6 +1,6 @@
 {
   "name": "shoetest",
-  "version": "2.0.0",
+  "version": "2.0.2",
   "description": "Powerful string matching insensitive to diacritics, special characters, symbols and case",
   "type": "commonjs",
   "sideEffects": false,
